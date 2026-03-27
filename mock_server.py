@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import uuid
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, unquote_plus
 
 VALID_USERNAME = "test.user"
 VALID_PASSWORD = "ChangeMe123!"
@@ -129,7 +129,8 @@ class MockHandler(BaseHTTPRequestHandler):
 
         # ── UI: Login form ──
         elif path == "/login":
-            params = dict(p.split("=") for p in body.decode().split("&") if "=" in p)
+            raw = parse_qs(body.decode(), keep_blank_values=True)
+            params = {k: v[0] for k, v in raw.items()}
             if params.get("username") == VALID_USERNAME and params.get("password") == VALID_PASSWORD:
                 self.send_response(302)
                 self.send_header("Location", "/dashboard")
