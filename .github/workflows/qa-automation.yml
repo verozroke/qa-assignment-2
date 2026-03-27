@@ -18,8 +18,8 @@ jobs:
       TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
       TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
       INVALID_TEST_PASSWORD: ${{ vars.INVALID_TEST_PASSWORD || 'WrongPassword123!' }}
-      SKIP_ON_UNREACHABLE: "true"
-      UI_HEADLESS: "true"
+      SKIP_ON_UNREACHABLE: 'true'
+      UI_HEADLESS: 'true'
 
     steps:
       - name: Checkout repository
@@ -28,8 +28,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-          cache: "pip"
+          python-version: '3.12'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -39,16 +39,21 @@ jobs:
       - name: Install Playwright browser
         run: playwright install --with-deps chromium
 
-      - name: Run pytest
+      - name: Run tests
         run: |
           mkdir -p test-results
-          pytest --junitxml=test-results/pytest-report.xml
+          pytest \
+            --junitxml=test-results/pytest-report.xml \
+            --html=test-results/report.html \
+            --self-contained-html \
+            || true
+
+      - name: Quality gate check
+        run: python quality_gate.py
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-results
-          path: |
-            test-results/pytest-report.xml
-            reports/test-run.log
+          name: test-results
+          path: test-results/
