@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      APP_BASE_URL: ${{ vars.APP_BASE_URL || 'http://localhost:8080' }}
-      API_BASE_URL: ${{ vars.API_BASE_URL || 'http://localhost:8080' }}
-      UI_BASE_URL: ${{ vars.UI_BASE_URL || 'http://localhost:8080' }}
-      TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
-      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-      INVALID_TEST_PASSWORD: ${{ vars.INVALID_TEST_PASSWORD || 'WrongPassword123!' }}
-      SKIP_ON_UNREACHABLE: 'true'
+      APP_BASE_URL: 'http://localhost:8080'
+      API_BASE_URL: 'http://localhost:8080'
+      UI_BASE_URL: 'http://localhost:8080'
+      TEST_USERNAME: 'test.user'
+      TEST_PASSWORD: 'ChangeMe123!'
+      INVALID_TEST_PASSWORD: 'WrongPassword123!'
+      SKIP_ON_UNREACHABLE: 'false'
       UI_HEADLESS: 'true'
 
     steps:
@@ -38,6 +38,12 @@ jobs:
 
       - name: Install Playwright browser
         run: playwright install --with-deps chromium
+
+      - name: Start mock server
+        run: |
+          python mock_server.py &
+          sleep 2
+          curl -s http://localhost:8080/login > /dev/null && echo "Mock server is up" || echo "Mock server failed"
 
       - name: Run tests
         run: |

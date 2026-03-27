@@ -9,9 +9,9 @@ from pathlib import Path
 REPORT_PATH = Path("test-results/pytest-report.xml")
 
 # ── Quality gate thresholds ──────────────────────────────────────────
-MIN_PASS_RATE = 80.0          # minimum % of tests that must pass
-MAX_CRITICAL_FAILURES = 0     # zero tolerance for critical-priority failures
-MAX_SKIPPED_PERCENT = 50.0    # if more than 50% skipped, gate fails
+MIN_PASS_RATE = 80.0
+MAX_CRITICAL_FAILURES = 0
+MAX_SKIPPED_PERCENT = 50.0
 # ─────────────────────────────────────────────────────────────────────
 
 
@@ -46,7 +46,6 @@ def parse_junit(path: Path) -> dict:
 def check_quality_gate(stats: dict) -> list[str]:
     violations = []
 
-    # Pass rate
     if stats["executed"] > 0:
         pass_rate = (stats["passed"] / stats["executed"]) * 100
     else:
@@ -58,13 +57,11 @@ def check_quality_gate(stats: dict) -> list[str]:
             f"Pass rate {pass_rate:.1f}% is below threshold {MIN_PASS_RATE}%"
         )
 
-    # Critical failures
     if stats["failed"] > MAX_CRITICAL_FAILURES:
         violations.append(
             f"{stats['failed']} test(s) failed (max allowed: {MAX_CRITICAL_FAILURES})"
         )
 
-    # Skipped ratio
     if stats["total"] > 0:
         skipped_pct = (stats["skipped"] / stats["total"]) * 100
     else:
